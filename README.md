@@ -1,10 +1,4 @@
 
-
----
-
-### **`README.md`**
-
-```markdown
 # Smart Meeting Room System
 
 ## Overview

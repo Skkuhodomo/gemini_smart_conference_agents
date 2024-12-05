@@ -68,4 +68,41 @@ def process_audio_and_summarize():
         print("음성을 인식할 수 없습니다.")
         return None, None
     except sr.RequestError as e:
-        print
+        print(f"STT 서비스 오류: {e}")
+        return None, None
+
+def save_to_firebase(text, summary):
+    """Firebase에 텍스트 및 요약 저장"""
+    ref = db.reference('/meeting')
+    ref.set({
+        "speech_text": text,
+        "summary": summary,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+if __name__ == "__main__":
+    try:
+        # 참석자 데이터 가져오기
+        attendees = get_attendees()
+        if not attendees:
+            print("참석자 데이터가 없습니다.")
+            exit()
+
+        # 난이도 계산
+        difficulty = calculate_difficulty(attendees)
+        print(f"발표 난이도: {difficulty}")
+
+        # Firebase에 난이도 저장
+        save_difficulty_to_firebase(difficulty)
+
+        # 음성 입력 처리 및 요약 생성
+        while True:
+            text, summary = process_audio_and_summarize()
+            if text and summary:
+                # Firebase에 저장
+                save_to_firebase(text, summary)
+                print("데이터가 Firebase에 저장되었습니다.")
+            time.sleep(5)
+
+    except Exception as e:
+        print(f"오류 발생: {e}")
